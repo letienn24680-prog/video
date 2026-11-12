@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Video Studio — Translator, Auto-Dub &amp; Faceless Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+            mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+          },
+          colors: {
+            studio: {
+              bg: "#0B0D12",
+              panel: "#121620",
+              card: "#191F2E",
+              hover: "#20273A",
+              border: "#262E42",
+              violet: "#8B5CF6",
+              cyan: "#06B6D4",
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="/css/studio.css" />
+</head>
+<body class="bg-[#0B0D12] text-slate-100 font-sans antialiased selection:bg-violet-500/30 selection:text-violet-100 overflow-hidden">
+  <div id="studio-shell" class="flex h-screen w-screen overflow-hidden bg-[#0B0D12] studio-grid-bg">
+    <!-- Mobile Sidebar Backdrop -->
+    <div
+      id="sidebar-backdrop"
+      class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm hidden lg:hidden"
+    ></div>
+
+    <!-- Left Studio Sidebar -->
+    <aside
+      id="studio-sidebar"
+      class="fixed lg:static inset-y-0 left-0 z-40 w-68 max-w-[272px] shrink-0 flex flex-col bg-[#121620]/95 backdrop-blur-xl border-r border-[#262E42] transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out"
+    >
+      <!-- Brand Header -->
+      <div class="h-16 px-5 flex items-center justify-between border-b border-[#262E42]">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 p-[1px] shadow-lg shadow-violet-500/20 shrink-0">
+            <div class="w-full h-full rounded-[11px] bg-[#0B0D12] flex items-center justify-center">
+              <svg class="w-5 h-5 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="6 4 20 12 6 20 6 4" fill="currentColor" fill-opacity="0.25" />
+                <path d="M4 4v16" stroke-linecap="round" />
+              </svg>
+            </div>
+          </div>
+          <div class="min-w-0">
+            <div class="text-sm font-bold tracking-tight text-white truncate">AI Video Studio</div>
+            <div class="text-[11px] font-medium text-cyan-400/90 tracking-wide uppercase">Creator Suite</div>
+          </div>
+        </div>
+        <button
+          id="sidebar-close-btn"
+          type="button"
+          class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#191F2E]"
+          aria-label="Đóng thanh điều hướng"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <nav id="studio-nav" class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto studio-scroll" aria-label="Studio Navigation">
+        <div class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          Workspace
+        </div>
+
+        <button
+          type="button"
+          data-nav="dashboard"
+          class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-[#191F2E] border border-transparent transition-all text-left"
+        >
+          <svg class="w-4 h-4 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+          <span class="truncate">Studio Dashboard</span>
+        </button>
+
+        <div class="pt-3 px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          AI Pipelines
+        </div>
+
+        <button
+          type="button"
+          data-nav="translator"
+          class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-[#191F2E] border border-transparent transition-all text-left"
+        >
+          <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          </svg>
+          <div class="min-w-0 flex-1">
+            <div class="truncate">Video Translator</div>
+            <div class="text-[11px] text-slate-400 truncate">Dịch &amp; Lồng tiếng hàng loạt</div>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          data-nav="faceless"
+          class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-[#191F2E] border border-transparent transition-all text-left"
+        >
+          <svg class="w-4 h-4 text-fuchsia-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          <div class="min-w-0 flex-1">
+            <div class="truncate">Faceless Generator</div>
+            <div class="text-[11px] text-slate-400 truncate">Chủ đề / Kịch bản / Báo</div>
+          </div>
+        </button>
+
+        <div class="pt-3 px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          Quản trị &amp; Tài khoản
+        </div>
+
+        <button
+          type="button"
+          data-nav="billing"
+          class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-[#191F2E] border border-transparent transition-all text-left"
+        >
+          <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          <div class="min-w-0 flex-1">
+            <div class="truncate">Credit &amp; Giao dịch</div>
+            <div class="text-[11px] text-slate-400 truncate">Lịch sử nạp &amp; tiêu hao</div>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          data-nav="settings"
+          class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-[#191F2E] border border-transparent transition-all text-left"
+        >
+          <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          <div class="min-w-0 flex-1">
+            <div class="truncate">Tài khoản &amp; Hệ thống</div>
+            <div class="text-[11px] text-slate-400 truncate">Hồ sơ, FFmpeg &amp; API</div>
+          </div>
+        </button>
+
+        <!-- Recent Active Job Shortcut -->
+        <div class="pt-5">
+          <div class="px-3 pb-2 flex items-center justify-between">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Job gần đây
+            </span>
+            <span class="w-2 h-2 rounded-full bg-cyan-400/70 pulse-dot"></span>
+          </div>
+          <div
+            id="sidebar-recent-job"
+            class="mx-1 rounded-xl bg-[#191F2E]/80 border border-[#262E42] p-3 text-xs text-slate-400"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-medium text-slate-300 truncate">Chưa có job đang chạy</span>
+            </div>
+            <p class="mt-1 text-[11px] text-slate-500">
+              Tạo dự án mới hoặc chọn một job từ Dashboard để theo dõi trực tiếp.
+            </p>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Sidebar Footer: User Tier Badge -->
+      <div class="p-3.5 border-t border-[#262E42] bg-[#0F131C]">
+        <div class="flex items-center justify-between gap-2 rounded-xl bg-[#191F2E] border border-[#262E42] px-3 py-2.5">
+          <div class="min-w-0">
+            <div class="text-[11px] text-slate-400">Gói Studio</div>
+            <div class="text-xs font-semibold text-white truncate">Tài khoản hiện tại</div>
+          </div>
+          <span
+            id="user-tier-badge"
+            data-tier="free"
+            class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-violet-500/15 text-violet-300 border border-violet-500/30 shrink-0 transition-colors"
+          >
+            FREE
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right Content Area -->
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <!-- Top Studio Bar -->
+      <header
+        id="studio-topbar"
+        class="h-16 shrink-0 px-4 lg:px-6 flex items-center justify-between gap-4 bg-[#121620]/90 backdrop-blur-xl border-b border-[#262E42]"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <button
+            id="mobile-sidebar-toggle"
+            type="button"
+            class="lg:hidden p-2 rounded-xl bg-[#191F2E] border border-[#262E42] text-slate-300 hover:text-white"
+            aria-label="Mở menu"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          <div class="min-w-0">
+            <h1 id="topbar-title" class="text-base sm:text-lg font-bold tracking-tight text-white truncate">
+              Studio Dashboard
+            </h1>
+            <div id="topbar-subtitle" class="text-xs text-slate-400 truncate hidden sm:block">
+              Dịch video hàng loạt, HITL Review &amp; Tạo video Faceless tự động
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <!-- SSE Live Status Indicator -->
+          <div
+            id="sse-connection-pill"
+            class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#191F2E] border border-[#262E42] text-xs text-slate-400"
+            title="Trạng thái kết nối SSE thời gian thực"
+          >
+            <span id="sse-status-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+            <span id="sse-status-label">Idle</span>
+          </div>
+
+          <!-- Credit Wallet Pill -->
+          <button
+            id="credit-balance-btn"
+            type="button"
+            class="group flex items-center gap-2.5 pl-3 pr-2 py-1.5 rounded-xl bg-[#191F2E] hover:bg-[#20273A] border border-[#262E42] hover:border-cyan-500/40 transition-all"
+            title="Xem ví Credit và nạp qua VietQR"
+          >
+            <div class="flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="9" fill-opacity="0.2" stroke="currentColor" stroke-width="1.8" />
+                <path d="M12 7v10m-2.5-7.5C9.5 8.67 10.62 8 12 8s2.5.67 2.5 1.5S13.38 11 12 11s-2.5.67-2.5 1.5S10.62 14 12 14s2.5-.67 2.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none" />
+              </svg>
+              <span id="credit-balance-value" class="font-mono text-sm font-semibold text-white">0</span>
+              <span class="text-xs text-slate-400 hidden sm:inline">Credits</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-cyan-500 text-[11px] font-semibold text-white shadow-sm group-hover:brightness-110 transition">
+              Nạp Credit
+            </span>
+          </button>
+
+          <!-- Auth Status Button -->
+          <button
+            id="auth-action-btn"
+            type="button"
+            class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#191F2E] hover:bg-[#20273A] border border-[#262E42] hover:border-violet-500/50 text-xs sm:text-sm font-medium text-slate-200 transition-all max-w-[200px]"
+          >
+            <span class="w-2 h-2 rounded-full bg-slate-500 shrink-0" data-auth-dot></span>
+            <span class="truncate" data-auth-label>Đăng nhập</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Workspace -->
+      <main
+        id="main-workspace"
+        class="relative flex-1 overflow-y-auto studio-scroll p-4 lg:p-6 space-y-6"
+      >
+        <!-- Local Sandbox Mode Banner (shown when publicConfig.local_sandbox_mode === true) -->
+        <div
+          id="sandbox-mode-banner"
+          class="hidden max-w-7xl mx-auto rounded-2xl border border-cyan-500/35 bg-gradient-to-r from-cyan-500/10 via-[#121620] to-violet-500/10 px-4 py-3 text-xs sm:text-sm text-slate-200 shadow-lg shadow-cyan-500/5"
+        ></div>
+
+        <!-- Active View Container (Dashboard / Translator / Faceless) -->
+        <section id="view-container" class="max-w-7xl mx-auto"></section>
+
+        <!-- Docked / Slide-over SSE Progress Console Container -->
+        <section id="studio-progress-root" class="max-w-7xl mx-auto hidden"></section>
+
+        <!-- Docked / Slide-over Human-in-the-Loop Review Editor Container -->
+        <section id="studio-review-root" class="max-w-7xl mx-auto hidden"></section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal Roots & Toast Container -->
+  <div id="vietqr-modal-root"></div>
+  <div id="auth-modal-root"></div>
+  <div id="project-detail-modal-root"></div>
+  <div id="studio-dialog-modal-root"></div>
+  <div id="video-player-modal-root"></div>
+  <div
+    id="toast-container"
+    class="fixed bottom-4 right-4 z-[100] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"
+    aria-live="polite"
+  ></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
